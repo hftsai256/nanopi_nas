@@ -65,22 +65,35 @@ frontboard_snap_w = 4;
 frontboard_snap_p = [[beam_h,2*beam_w,-beam_h],
                      [box_width-beam_h-backboard_snap_w,2*beam_w,-beam_h]];
 
-display_offset = 25;
-color("red") base_board();
-color("green",0.8) translate([2*beam_w-0.5*beam_h,0,beam_h+display_offset/2])
-	hdd_mount();
-color("lightgreen",0.8) translate([2*beam_w+hdd_w+1.5*beam_h,0,beam_h+display_offset/2]) mirror([1,0,0])
-	hdd_mount();
-color("blue",0.8) translate([0,-display_offset,0])
-	front_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
-color("blue",0.5) translate([0,display_offset,0])
-	cut_back_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
-color("lightblue",0.8) translate([-display_offset,0,0])
-	cut_left_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
-color("lightblue",0.8) translate([display_offset,0,0])
-	cut_right_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
-color("orange",0.8) translate([0,0,box_height-4+display_offset]) top_board();
+display="";
 
+if (display == "") assemble();
+if (display == "base_board.stl") base_board();
+if (display == "hdd_mount_left.stl") hdd_mount();
+if (display == "hdd_mount_right.stl") mirror([1,0,0]) hdd_mount();
+if (display == "front_panel.stl") front_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
+if (display == "cut_back_panel.stl") cut_back_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
+if (display == "cut_left_panel.stl") cut_left_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
+if (display == "cut_right_panel.stl") cut_right_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
+if (display == "top_board.stl") top_board();
+
+module assemble() {
+	display_offset = 25;
+	color("red") base_board();
+	color("green",0.8) translate([2*beam_w-0.5*beam_h,0,beam_h+display_offset/2])
+		hdd_mount();
+	color("lightgreen",0.8) translate([2*beam_w+hdd_w+1.5*beam_h,0,beam_h+display_offset/2]) mirror([1,0,0])
+		hdd_mount();
+	color("blue",0.8) translate([0,-display_offset,0])
+		front_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
+	color("blue",0.5) translate([0,display_offset,0])
+		cut_back_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
+	color("lightblue",0.8) translate([-display_offset,0,0])
+		cut_left_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
+	color("lightblue",0.8) translate([display_offset,0,0])
+		cut_right_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
+	color("orange",0.8) translate([0,0,box_height-4+display_offset]) top_board();
+}
 
 module base_board()
 {
