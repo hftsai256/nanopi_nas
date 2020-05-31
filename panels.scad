@@ -83,6 +83,9 @@ module cut_back_panel(box_width=114, box_depth=220, box_height=160, t=2, r=4)
 	hdmi_size = [16, 3*t, 7];
 	hdmi_p = [47, box_depth-t, 20+r];
 
+	wifi_p = [[box_width/2-2*r, box_depth+2*t, 65], [box_width/2+2*r, box_depth+2*t, 65]];
+	wifi_r = 3;
+
 	difference() {
 		translate([0,box_depth,0]) mirror([0,1,0])
 			front_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
@@ -90,6 +93,11 @@ module cut_back_panel(box_width=114, box_depth=220, box_height=160, t=2, r=4)
 		translate(pwr_p) cube(pwr_size);
 		translate(rst_p) rotate([90,0,0]) cylinder(h=3*t, r=rst_r);
 		translate(hdmi_p) cube(hdmi_size);
+
+		for(p=wifi_p) {
+			translate(p) rotate([90,0,0]) cylinder(h=3*t, r=wifi_r);
+			translate(p+[0,-1.5*t,0]) rotate([90,0,0]) cylinder(h=2*t, r=wifi_r+2.5);
+		}
 	}
 }
 
