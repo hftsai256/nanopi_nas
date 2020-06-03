@@ -11,9 +11,9 @@ hdd_l  = 147.0;
 beam_w = 4;
 beam_h = 2;
 
-box_width = beam_w*4+hdd_w;
+box_width = beam_w*6+hdd_w;
 box_depth = 220;
-box_height = 160;
+box_height = 140;
 vent_edge = 20;
 
 cyl_p = [[beam_w, beam_w, 0],
@@ -28,6 +28,7 @@ corner_cut_p = [[beam_w,beam_w,-beam_h],
 
 // HDD Rack
 hdd_spacer    =  5;
+hdd_cl        =  8;
 hdd_front_pad = 45.4;
 hdd_back_pad  = 26.1;
 hdd_screw_off = 6.35;
@@ -37,10 +38,11 @@ snap_w = 8;
 snap_h = 4;
 snap_cutout = 0.5;
 snap_offset = (post_w - snap_w)/2;
-hdd_snap_p = [[2*beam_w,beam_w-snap_w/2+post_p[0],-beam_h],
-              [2*beam_w,beam_w-snap_w/2+post_p[1],-beam_h],
-              [2*beam_w+hdd_w,beam_w-snap_w/2+post_p[0],-beam_h],
-              [2*beam_w+hdd_w,beam_w-snap_w/2+post_p[1],-beam_h]];
+xc_offset = (box_width-(4*beam_w+hdd_w))/2;
+hdd_snap_p = [[xc_offset+2*beam_w,hdd_cl+beam_w-snap_w/2+post_p[0],-beam_h],
+              [xc_offset+2*beam_w,hdd_cl+beam_w-snap_w/2+post_p[1],-beam_h],
+              [xc_offset+2*beam_w+hdd_w,hdd_cl+beam_w-snap_w/2+post_p[0],-beam_h],
+              [xc_offset+2*beam_w+hdd_w,hdd_cl+beam_w-snap_w/2+post_p[1],-beam_h]];
 
 // Pi Mount
 t = beam_h;
@@ -56,14 +58,13 @@ pi_p = [beam_w, box_depth-screw_sep_width-screw_r2, 0];
 pi_backplate_p = [beam_w,box_depth-screw_sep_width-2*screw_r2,0];
 
 // Backboard
-backboard_snap_w = 4;
-backboard_snap_p = [[beam_h,box_depth-2*beam_w-beam_h,-beam_h],
-                    [box_width-beam_h-backboard_snap_w,box_depth-2*beam_w-beam_h,-beam_h]];
-
-// Frontboard
-frontboard_snap_w = 4;
-frontboard_snap_p = [[beam_h,2*beam_w,-beam_h],
-                     [box_width-beam_h-backboard_snap_w,2*beam_w,-beam_h]];
+bottom_lock_w = 12;
+backboard_snap_p = [(box_width-bottom_lock_w)/2, box_depth-2*beam_w, -beam_h];
+frontboard_snap_p = [(box_width-bottom_lock_w)/2, beam_w+1, -beam_h];
+snap_p = [[(box_width-bottom_lock_w)/2, box_depth-4*beam_h, -beam_h],
+          [(box_width-bottom_lock_w)/2, 2.5*beam_h, -beam_h],
+          [2.5*beam_h, (box_depth-bottom_lock_w)/2, -beam_h],
+          [box_width-4*beam_h, (box_depth-bottom_lock_w)/2, -beam_h]];
 
 display="";
 
@@ -80,9 +81,9 @@ if (display == "top_board.stl") top_board();
 module assemble() {
 	display_offset = 25;
 	color("red") base_board();
-	color("green",0.8) translate([2*beam_w-0.5*beam_h,0,beam_h+display_offset/2])
+	color("green",0.8) translate([xc_offset+2*beam_w-0.5*beam_h,hdd_cl,beam_h+display_offset/2])
 		hdd_mount();
-	color("lightgreen",0.8) translate([2*beam_w+hdd_w+1.5*beam_h,0,beam_h+display_offset/2]) mirror([1,0,0])
+	color("lightgreen",0.8) translate([xc_offset+2*beam_w+hdd_w+1.5*beam_h,hdd_cl,beam_h+display_offset/2]) mirror([1,0,0])
 		hdd_mount();
 	color("blue",0.8) translate([0,-display_offset,0])
 		front_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
@@ -144,16 +145,6 @@ module base_board()
         for(c=corner_cut_p){
             translate(c) cylinder(r=screw_r0, h=pistand_h+t);
         }
-        
-        // Backboard snap-in
-        for(s=backboard_snap_p){
-            translate(s) cube([backboard_snap_w,beam_h,3*beam_h]);
-        }
-        
-        // Frontboard snap-in
-        for(s=frontboard_snap_p){
-            translate(s) cube([frontboard_snap_w,beam_h,3*beam_h]);
-        }
     }
 }
 
@@ -174,14 +165,10 @@ module top_board()
         }
     
     // Cutouts
-        // Backboard
-        for(s=backboard_snap_p){
-            translate(s) cube([backboard_snap_w,beam_h,3*beam_h]);
-        }
-        // Frontboard
-        for(s=frontboard_snap_p){
-            translate(s) cube([frontboard_snap_w,beam_h,3*beam_h]);
-        }
+		translate(snap_p[0]) cube([bottom_lock_w,1.5*beam_h,3*beam_h]);
+		translate(snap_p[1]) cube([bottom_lock_w,1.5*beam_h,3*beam_h]);
+		translate(snap_p[2]) cube([1.5*beam_h,bottom_lock_w,3*beam_h]);
+		translate(snap_p[3]) cube([1.5*beam_h,bottom_lock_w,3*beam_h]);
     }
 }
 

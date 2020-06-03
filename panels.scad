@@ -8,42 +8,45 @@ vent_edge = 20;
 
 module front_panel(box_width=114, box_depth=220, box_height=160, t=2, r=4)
 {
-    // Bottom stands
-    translate([r,r,-stand_h]) {
-        corner(h=stand_h);
-        corner(h=stand_h+box_height,solid=false);
-    }
-    translate([box_width-r,r,-stand_h]) mirror([1,0,0]) {
-        corner(h=stand_h);
-        corner(h=stand_h+box_height,solid=false);
-    }
+	difference() {
+		union() {
+    		// Bottom stands
+    		translate([r,r,-stand_h]) {
+        		translate([0,0,stand_h-t]) corner(h=t);
+        		corner(h=stand_h+box_height,solid=false);
+    		}
+    		translate([box_width-r,r,-stand_h]) mirror([1,0,0]) {
+        		translate([0,0,stand_h-t]) corner(h=t);
+        		corner(h=stand_h+box_height,solid=false);
+    		}
 
-    // Bottom locks
-    translate([3*r,0,t]) cube([bottom_lock_w, 2*r, t]);
-    translate([box_width-bottom_lock_w-3*r,0,t]) cube([bottom_lock_w, 2*r, t]);
-    translate([(box_width-bottom_lock_w)/2,0,t]) cube([bottom_lock_w, 2*r, t]);
+    		// Bottom locks
+    		translate([3*r,0,t]) cube([bottom_lock_w, r, t]);
+    		translate([box_width-bottom_lock_w-3*r,0,t]) cube([bottom_lock_w, r, t]);
+			translate([(box_width-bottom_lock_w)/2, 0, -stand_h]) cube([bottom_lock_w, r, stand_h]);
 
-	// Side locks
-	translate([r,r,side_lock_h-t]) difference() {
-		corner(h=t);
-		translate([0,-r-t,-t])cube([r+t,2*(r+t),3*t]);
+			// Side locks
+			translate([r,r,side_lock_h-t]) difference() {
+				corner(h=box_height-side_lock_h-t);
+				translate([-r,0,t])cube([t+0.2,2*r,box_height-side_lock_h]);
+			}
+			translate([box_width-r,r,side_lock_h-t])mirror([1,0,0]) difference() {
+				corner(h=box_height-side_lock_h-t);
+				translate([-r,0,t]) cube([t+0.2,2*r,box_height-side_lock_h]);
+			}
+			
+    		// Top blocks
+    		translate([r,-t,-stand_h])cube([box_width-2*r,t,box_height+stand_h]);
+
+			// Snap-ins
+			translate([box_width/2,r,box_height-4*r]) snap_in(h=4*r,w=bottom_lock_w);
+			translate([(box_width-bottom_lock_w)/2, 0, box_height-4*r])
+				cube([bottom_lock_w, r, t]);
+		}
+		translate([r,r,-stand_h]) cylinder(r=1.5,h=3*stand_h);
+		translate([box_width-r,r,-stand_h]) cylinder(r=1.5,h=3*stand_h);
 	}
-	translate([box_width-r,r,side_lock_h-t])mirror([1,0,0]) difference() {
-		corner(h=t);
-		translate([0,-r-t,-t])cube([r+t,2*(r+t),3*t]);
-	}
-	
-    // Top blocks
-    translate([r,r,box_height-2*t-1.5*stand_h]) corner(h=1.5*stand_h);
-    translate([box_width-r,r,box_height-2*t-1.5*stand_h])mirror([1,0,0]) corner(h=1.5*stand_h);
-    translate([r,-t,-stand_h])cube([box_width-2*r,t,box_height+stand_h]);
     
-    // Snap-in
-    snap_h = 8;
-    translate([r,2*r,-snap_h+2*t]) snap_in(h=snap_h);
-    translate([box_width-r,2*r,-snap_h+2*t]) snap_in(h=snap_h);
-    translate([r,2*r,box_height-snap_h]) snap_in(h=snap_h);
-    translate([box_width-r,2*r,box_height-snap_h]) snap_in(h=snap_h);
 }
 
 module left_panel(box_width=114, box_depth=220, box_height=160, t=2, r=4)
@@ -51,10 +54,15 @@ module left_panel(box_width=114, box_depth=220, box_height=160, t=2, r=4)
 	difference() {
 		union() {
 			translate([-t,0,t]) cube([t, box_depth-4*r, box_height-t]);
-			translate([0,-r,side_lock_h]) cube([t,2*r,box_height-2*t-1.5*stand_h-side_lock_h]);
-			translate([-t,0,side_lock_h]) cube([2*t,r,box_height-2*t-1.5*stand_h-side_lock_h]);
-			translate([0,box_depth-5*r,side_lock_h]) cube([t,2*r,box_height-2*t-1.5*stand_h-side_lock_h]);
-			translate([-t,box_depth-5*r,side_lock_h]) cube([2*t,r,box_height-2*t-1.5*stand_h-side_lock_h]);
+			translate([0,-r,side_lock_h]) cube([t,2*r,box_height-2*t-side_lock_h]);
+			translate([-t,0,side_lock_h]) cube([2*t,r,box_height-2*t-side_lock_h]);
+			translate([0,box_depth-5*r,side_lock_h]) cube([t,2*r,box_height-2*t-side_lock_h]);
+			translate([-t,box_depth-5*r,side_lock_h]) cube([2*t,r,box_height-2*t-side_lock_h]);
+
+			translate([0, (box_depth-bottom_lock_w-r)/2,box_height-4*r]) {
+				translate([r,0,0]) rotate([0,0,-90]) snap_in(h=4*r,w=bottom_lock_w);
+				translate([0,-bottom_lock_w/2,0])cube([r, bottom_lock_w, t]);
+			}
 		}
 		translate([-2*t,vent_edge,(box_height-vent_edge)/2]) cube([3*t,box_depth-4*r-4*vent_edge,(box_height-vent_edge)/2]);
 	}
@@ -82,13 +90,14 @@ module cut_back_panel(box_width=114, box_depth=220, box_height=160, t=2, r=4)
 	rst_p = [74, box_depth+2*t, 43+r];
 	hdmi_size = [16, 3*t, 7];
 	hdmi_p = [47, box_depth-t, 20+r];
-
 	wifi_p = [[box_width/2-2*r, box_depth+2*t, 65], [box_width/2+2*r, box_depth+2*t, 65]];
 	wifi_r = 3;
+	stand_p = [r,box_depth-r,-r];
 
 	difference() {
 		translate([0,box_depth,0]) mirror([0,1,0])
 			front_panel(box_width=box_width, box_depth=box_depth, box_height=box_height);
+		translate(stand_p) cylinder(r=3, h=2*r);
 		translate(io_p) cube(io_size);
 		translate(pwr_p) cube(pwr_size);
 		translate(rst_p) rotate([90,0,0]) cylinder(h=3*t, r=rst_r);
@@ -157,7 +166,26 @@ module corner(r=4, h=8, t=2, solid=true)
     }
 }
 
-module snap_in(h=8, w=4, t=2)
+module snap_in(h=10, w=8, t=2)
+{
+	ext_r=2*t;
+
+	translate([w/2, 0, ext_r]) union() {
+		rotate([-90,0,90]) linear_extrude(height=w) union() {
+			intersection() {
+				difference() {
+					circle(r=ext_r);
+					circle(r=t);
+				}
+				translate([0,0,0])square([5,5]);
+			}
+			translate([t,-h+ext_r, 0]) square([t, h-ext_r]);
+		}
+    	translate([-w,1.5*t,h-3*t]) linear_extrude(scale=[1,0.5],height=t) square([w,t]);
+    }
+}
+
+module snap_in_old(h=8, w=4, t=2)
 {
     translate([-w/2,0,0]) union() {
         translate([w,0,t])rotate([0,-90,0]) linear_extrude(height=w) difference(){
@@ -171,7 +199,7 @@ module snap_in(h=8, w=4, t=2)
             translate([0,-t/2]) square([2*t,t]);
         }
         translate([0,t/2,t]) cube([w,t/2,h-t]); 
-        translate([0,t/2,h-t]) linear_extrude(scale=[1,0.5],height=t) #square([w,t]);
+        translate([0,t/2,h-t]) linear_extrude(scale=[1,0.5],height=t) square([w,t]);
     }
 }
 
